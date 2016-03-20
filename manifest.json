@@ -23,7 +23,8 @@
     "permissions": [
         "storage",
         "unlimitedStorage",
-        "contextMenus"
+        "contextMenus",
+        "*://*/*"
     ],
     "offline_enabled": true,
     "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com; object-src 'self'",
