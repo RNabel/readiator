@@ -266,19 +266,19 @@ document.addEventListener("DOMContentLoaded", function (event) {
         };
 
 
-        var lastTime = Date.now() / 1000 | 0;
+        var lastTime = 0;
         var requested = false;
         var bookTaxonomy = undefined;
 
         var scrollHandler = function (ev) {
             if (canRequest) {
 
-
-                var currentTime = Date.now() / 1000 | 0;
+                var currentTime = Date.now();
 
                 var difference = currentTime - lastTime;
+                console.log(difference);
 
-                if (difference < 1) {
+                if (difference < 1000) {
                     requested = true;
                     setTimeout(scrollHandler, (difference) * 1100);
                     return;
@@ -306,10 +306,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 // Get relevant keywords.
                 alchemyApiRequest("http://gateway-a.watsonplatform.net/calls/text/TextGetRankedKeywords", text, function (ev) {
                     var resultObj = JSON.parse(xml2json(ev).replace("undefined", ""));
-                    var keywords = resultObj.results.keywords.keyword[0].text;
-                    var split_kewords = keywords.split(" ");
-                    console.log(split_kewords);
-                    for (var i = 0; i < split_kewords.length; i++) {
+                    if (resultObj.results.keywords) {
+                        var keywords = resultObj.results.keywords.keyword[0].text;
+                        var split_kewords = keywords.split(" ");
+                        console.log(split_kewords);
+                        for (var i = 0; i < split_kewords.length; i++) {
+                        }
+
                         var word = split_kewords[i];
                         playsound(word);
                     }
