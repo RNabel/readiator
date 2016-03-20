@@ -308,13 +308,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     var resultObj = JSON.parse(xml2json(ev).replace("undefined", ""));
                     if (resultObj.results.keywords) {
                         var keywords = resultObj.results.keywords.keyword[0].text;
-                        var split_kewords = keywords.split(" ");
-                        console.log(split_kewords);
-                        for (var i = 0; i < split_kewords.length; i++) {
+                        var splitKeywords = keywords.split(" ");
+                        console.log(splitKeywords);
+                        for (var i = 0; i < splitKeywords.length; i++) {
+                            var word = splitKeywords[i];
+                            playsound(word);
                         }
 
-                        var word = split_kewords[i];
-                        playsound(word);
                     }
                 }, "POST");
 
@@ -345,6 +345,21 @@ $(window).ready(function () {
                 $('span.book-title').append("    (detected as: " + retObj.results.taxonomy.element[0].label.substring(1) + ")");
             }
         }, "POST");
+
+        // Register sounds to be played.
+        var split = pElements.text().split("."),
+            totalWords = 0;
+        for (var i = 0; i < split.length; i++) {
+            var sentence = split[i],
+                sentenceLength = sentence.split(" ");
+
+            setTimeout(function() {
+                // TODO run sentiment analysis and play sound.
+
+            }, totalWords * 60 / 200 * 1000);
+            totalWords += sentenceLength;
+        }
+
     }, 1000);
 
 });
