@@ -4,7 +4,7 @@
 
 var playing = null;
 var next = null;
-
+var canRequest = true;
 // joy
 // neutral
 // digust
@@ -15,7 +15,7 @@ var next = null;
 // genre: techno, old
 
 function newsound(mood, genre) {
-    console.log("starting " + genre + "/" + mood);
+    //console.log("starting " + genre + "/" + mood);
     var sound = new Howl({
         urls: ['https://cl95.host.cs.st-andrews.ac.uk/bookthing/' + mood + '-' + genre + '.ogg'],
         loop: true
@@ -26,17 +26,16 @@ function newsound(mood, genre) {
 function playmusic(mood, genre) {
     if (playing == null) {
         playing = newsound(mood, genre);
-        console.log("fading " + genre + "/" + mood);
+        //console.log("fading " + genre + "/" + mood);
         playing.play();
         playing.fade(0.0, 1.0, 5000);
     } else {
-        next = newsound(num);
-        console.log("fading that out " + num);
+        next = newsound(mood, genre);
         playing.fade(1.0, 0.0, 5000, function () {
             playing = next;
             playing.play();
             playing.fade(0.0, 1.0, 5000);
-            console.log('callback');
+            //console.log('callback');
         });
     }
 }
@@ -272,59 +271,59 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var bookTaxonomy = undefined;
 
         var scrollHandler = function (ev) {
-            var currentTime = Date.now() / 1000 | 0;
+            if (canRequest) {
 
-            var difference = currentTime - lastTime;
 
-            if (difference < 1) {
-                requested = true;
-                setTimeout(scrollHandler, (difference) * 1100);
-                return;
-            }
+                var currentTime = Date.now() / 1000 | 0;
 
-            // Get all p elements.
-            var pElements = $("p", this.document);
-            if (!bookTaxonomy) {
-                alchemyApiRequest("http://gateway-a.watsonplatform.net/calls/text/TextGetRankedTaxonomy", pElements.text(), function (ev) {
-                    var retObj = JSON.parse(xml2json(ev).replace("undefined", ""));
-                    bookTaxonomy = retObj;
+                var difference = currentTime - lastTime;
+
+                if (difference < 1) {
+                    requested = true;
+                    setTimeout(scrollHandler, (difference) * 1100);
+                    return;
+                }
+
+                // Get all p elements.
+                var pElements = $("p", this.document);
+                if (!bookTaxonomy) {
+                    alchemyApiRequest("http://gateway-a.watsonplatform.net/calls/text/TextGetRankedTaxonomy", pElements.text(), function (ev) {
+                        var retObj = JSON.parse(xml2json(ev).replace("undefined", ""));
+                        bookTaxonomy = retObj;
+                    });
+                }
+                var self = this;
+
+                // Filter for elements which are visible.
+                var visibleElements = $.map(pElements, function (element) {
+                    if (elementInViewport(element, self)) {
+                        return element;
+                    }
                 });
+
+                var text = $(visibleElements).text();
+
+                // Get relevant keywords.
+                alchemyApiRequest("http://gateway-a.watsonplatform.net/calls/text/TextGetRankedKeywords", text, function (ev) {
+                    var resultObj = JSON.parse(xml2json(ev).replace("undefined", ""));
+                    var keywords = resultObj.results.keywords.keyword[0].text;
+                    var split_kewords = keywords.split(" ");
+                    console.log(split_kewords);
+                    for (var i = 0; i < split_kewords.length; i++) {
+                        var word = split_kewords[i];
+                        playsound(word);
+                    }
+                }, "POST");
+
+                // Get mood.
+                alchemyApiRequest("http://gateway-a.watsonplatform.net/calls/text/TextGetEmotion", text, moodExtractor, "POST");
             }
-            var self = this;
-
-            // Filter for elements which are visible.
-            var visibleElements = $.map(pElements, function (element) {
-                if (elementInViewport(element, self)) {
-                    return element;
-                }
-            });
-
-            var text = $(visibleElements).text();
-
-            // Get relevant keywords.
-            alchemyApiRequest("http://gateway-a.watsonplatform.net/calls/text/TextGetRankedKeywords", text, function (ev) {
-                var resultObj = JSON.parse(xml2json(ev).replace("undefined", ""));
-                var keywords = resultObj.results.keywords.keyword[0].text;
-                var split_kewords = keywords.split(" ");
-                console.log(split_kewords);
-                for (var i = 0; i < split_kewords.length; i++) {
-                    var word = split_kewords[i];
-                    playsound(word);
-                }
-            }, "POST");
-
-            // Get mood.
-            alchemyApiRequest("http://gateway-a.watsonplatform.net/calls/text/TextGetEmotion", text, moodExtractor, "POST");
         };
 
         $(iframe).load(function () {
             // Register the scroll handler.
             $(iframe.contentWindow).scroll(scrollHandler);
         });
-
-        $(iframe).ready(function () {
-            console.log("READY");
-        })
     }
 );
 
@@ -334,11 +333,14 @@ $(window).ready(function () {
         // Load the p elements.
         var iframe = document.getElementById('epubjs-iframe');
         var pElements = $("p", iframe.contentWindow.document);
+        canRequest = true;
         alchemyApiRequest("http://gateway-a.watsonplatform.net/calls/text/TextGetRankedTaxonomy", pElements.text(), function (ev) {
             var retObj = JSON.parse(xml2json(ev).replace("undefined", ""));
             bookTaxonomy = retObj;
 
-            $('span.book-title').append("    (detected as: " + retObj.results.taxonomy.element[0].label.substring(1) + ")");
+            if (retObj.results.taxonomy && retObj.results.taxonomy.element[0].label) {
+                $('span.book-title').append("    (detected as: " + retObj.results.taxonomy.element[0].label.substring(1) + ")");
+            }
         }, "POST");
     }, 1000);
 
