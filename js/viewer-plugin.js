@@ -8,24 +8,32 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var emotion = "neutral";
         var largest = 0.5;
 
-        if (emotions.anger - emotions.joy >= 0.2 && emotions.anger > 0.3) {
-            emotion = "anger";
-            largest = emotions.anger;
-        }
+        //if (emotions.anger - emotions.joy >= 0.2 && emotions.anger > 0.3) {
+        //    emotion = "anger";
+        //    largest = emotions.anger;
+        //}
+        //
+        //if (emotions.joy - emotions.anger >= 0.2 && emotions.joy > 0.3) {
+        //    emotion = "joy";
+        //    largest = emotions.joy;
+        //}
+        //
+        //if (emotions.disgust > largest) {
+        //    emotion = "disgust";
+        //    largest = emotions.disgust;
+        //}
+        //
+        //if (emotions.fear > largest) {
+        //    emotion = "fear";
+        //    largest = emotions.fear;
+        //}
 
-        if (emotions.joy - emotions.anger >= 0.2 && emotions.joy > 0.3) {
-            emotion = "joy";
-            largest = emotions.joy;
-        }
-
-        if (emotions.disgust > largest) {
-            emotion = "disgust";
-            largest = emotions.disgust;
-        }
-
-        if (emotions.fear > largest) {
-            emotion = "fear";
-            largest = emotions.fear;
+        for(var key in emotions) {
+            if (emotions.hasOwnProperty(key) &&
+                    emotions[key] >= largest) {
+                emotion = key;
+                largest = emotions[key];
+            }
         }
 
         return [emotion, largest];
@@ -53,12 +61,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     var moodExtractor = function (ev) {
         var emotions = {
-                anger: parseFloat($('anger', ev.children).text()),
-                disgust: 10 * $('disgust', ev.children).text(),
-                fear: 10 * $('fear', ev.children).text(),
-                sadness: 10 * $('sadness', ev.children).text(),
-                joy: 10 * $('joy', ev.children).text()
-            };
+            //anger: parseFloat($('anger', ev.children).text()),
+            disgust: 10 * $('disgust', ev.children).text(),
+            fear: 10 * $('fear', ev.children).text(),
+            sadness: 10 * $('sadness', ev.children).text(),
+            joy: 10 * $('joy', ev.children).text()
+        };
         var result = moodDecider(emotions);
         console.log(result);
         return emotions;
