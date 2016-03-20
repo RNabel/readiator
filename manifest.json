@@ -1,8 +1,8 @@
 {
 "update_url": "https://clients2.google.com/service/update2/crx",
 
-    "name": "Readiator EPUB Reader",
-    "short_name": "Readiator",
+    "name": "Augment EPUB Reader",
+    "short_name": "Augment",
     "description": "Open source EPUB reader with full EPUB3 support, works offline",
     "version": "0.4.6",
     "manifest_version": 2,
