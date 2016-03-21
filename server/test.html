@@ -1,0 +1,63 @@
+<html>
+	<body>
+		<!-- <button id="track1">track1</button> -->
+		<!-- <button id="track2">track2</button><br> -->
+		<input id="q" type="text" placeholder="sound"></input>
+		<button id="birdies">play sound</button><br>
+		<input id="genre" type="text" placeholder="genre"></input>
+		<input id="mood" type="text" placeholder="mood"></input>
+		<button id="music">play the music</button><br>
+		<script type="text/javascript" src="howler.js"></script>
+		<script>
+var playing = null;
+var next = null;
+
+// joy
+// neutral
+// digust
+// fear
+// anger
+// sadness
+
+// genre: techno, old
+
+function newsound(mood, genre) {
+	console.log("starting " + genre +  "/" + mood);
+	var sound = new Howl({
+		urls: [mood + '-' + genre + '.ogg'],
+		loop:true
+	});
+	return sound;
+}
+
+function playmusic(mood, genre) {
+	if (playing == null) {
+		playing = newsound(mood, genre);
+		console.log("fading " + genre +  "/" + mood);
+		playing.play();
+		playing.fade(0.0, 1.0, 5000);
+	} else {
+		next = newsound(num);
+		console.log("fading that out " + num);
+		playing.fade(1.0, 0.0, 5000, function() { playing = next; playing.play();playing.fade(0.0, 1.0, 5000); console.log('callback');});
+	}
+}
+
+function playsound(word) {
+	console.log(word);
+	if (word != '') {
+		var sound = new Howl({
+			urls: ['audio.php?q=' + encodeURIComponent(word)],
+			format: 'wav'
+		});
+		sound.play();
+	}
+}
+
+// document.getElementById('track1').addEventListener("click", function(){ playmusic(0); });
+// document.getElementById('track2').addEventListener("click", function(){ playmusic(1); });
+document.getElementById('music').addEventListener("click", function(){ playmusic(document.getElementById('mood').value, document.getElementById('genre').value); });
+document.getElementById('birdies').addEventListener("click", function(){ playsound(document.getElementById('q').value); });
+	</script>
+	</body>
+</html>
